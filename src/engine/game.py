@@ -1,248 +1,142 @@
-from random    import *
-from itertools import *
-from sys       import *
-
-# player_names = ["pioro","anielski","ostaszewski","goik"]
-# test = True
-
-
-GAMES_TO_PLAY   = 10
-ROUNDS_PER_GAME = 30
-GUN_SIZE        = 3
-
-
-def message( kind, msg ):
-  print "### COWBOYS( %s ): %s" % (kind, msg)
-
-
-
-
-
-def createPlayers( names ):
-  players = []
-  i = 0
-  for name in names:
-#    print name
-    X = __import__(name)
-    players += [ X.Player() ]
-    try:
-      players[i].name(i)
-    except:
-      pass
-    i+=1
-
-  return players
-
-
-
-
-
-def games( names ):
-  
-  scores = [0.0, 0.0, 0.0]
-
-  message( "START SERIES", str(names) )
-  players = createPlayers( names )  
-  for i in range( GAMES_TO_PLAY ):
-     message( "GAME START", str(i+1) )
-     scores = game( players, scores )
-
-  return scores
-
-
-
-
-def game( players, scores ):
-
-  # stan gry
-  bullets   = [ 0    , 0    , 0    ]  # liczba naboi w rewolwerze
-  players_alive = 3                   # liczba zywych graczy
-  alive     = [ True , True , True ]  # czy kowboj zyje
-  hide_prev = [ False, False, False]  # czy poprzednio wykonal unik
-  hide_now  = [ False, False, False]  # czy teraz wykonuje unik
-  shoots    = [ False, False, False]  # czy do kogos strzela
-  dies_now  = [ False, False, False]  # czy umiera w tej rundzie
-  reason    = [ ""   , ""   , ""   ]  # powod smierci
-  shoots_at = [ -1   , -1   , -1   ]  # do kogo strzela
-  
-
-  # poinformuj kazdego gracza o poczatku gry
-  for i in range(3):
-    try: 
-      players[i].start()
-    except:
-      message( "EXCEPTION", "start of player %i" % i )
-
-  # rozegraj kolejne rundy
-  for r in range( ROUNDS_PER_GAME ):
-
-    for i in range(3): 
-      hide_prev[i] = hide_now[i]
-      dies_now[i]  = False
-      shoots[i]    = False
-
-    for i in range(3):
-      try:
-        players[i].preround_info( alive[:], bullets[:] )
-      except:
-        message( "EXCEPTION", "player uses API <0.3?" )
-
-
-    strategy = [ "UNIK", "UNIK", "UNIK" ]
-    for i in range(3):
-      try:
-        if( alive[i] ):
-          strategy[i] = players[i].strategy()
-        else: 
-          strategy[i] = "DEAD"
-      except:
-        strategy[i] = "UNIK"  
-        message( "EXCEPTION", "players[%i].strategy()" % i )
-
-    for i in range(3):
-      if type(strategy[i]) != type(""):
-        strategy[i] = "UNIK"
-
-
-    message( "ROUND %i" % r, "strategies %s" % str( strategy ))
-
-    # parsuj zaproponowane strategie
-    for i in range(3):
-    
-      dies_now[i] = False
-
-      if( alive[i] ):
-        if( strategy[i] == "LADUJ" ):
-          bullets[i] += 1
-
-        hide_now[i] = False
-        if( strategy[i] == "UNIK"  ):
-          hide_now[i] = True
-
-        shoots[i] = False
-        if( strategy[i][0:6] == "STRZEL"): 
-          shoots[i] = True
-          shoots_at[i] = int(strategy[i][7:])
-          # strzal w siebie przy bledzie---zmarnowana runda
-          if( (shoots_at[i] < 0) or (shoots_at[i] > 2)):
-            shoots_at[i] = i
-            strategy[i] = ("STRZEL %i" % i)
-
-
-
-    # wykonaj strategie
-    for i in range(3):
-
-      if( bullets[i] > GUN_SIZE ):
-        dies_now[i] = True
-        reason[i]   = "loading bullet above the limit"
-
-      if( (hide_now[i] == True) and (hide_prev[i] == True) ):
-        dies_now[i] = True
-        reason[i]   = "hiding two times in a row"
-
-      if( shoots[i] ):
-        if( bullets[i] == 0 ):
-          dies_now[i] = True
-          reason[i] = "shoting without bullets"
-          continue
-
-        bullets[i] -= 1
-
-        if( hide_now[shoots_at[i]] ):
-          continue
-        if( shoots[ shoots_at[i] ] and (shoots_at[ shoots_at[i] ] == i) ):
-          continue
-        dies_now[ shoots_at[i]] = True
-        reason[ shoots_at[i]] = ("shot by %i" %i)
-
-
-
-    # poinformuj o strategiach i o smierci
-    for i in range(3):
-      try:
-        players[i].round_result( strategy )
-      except:
-        message( "EXCEPTION", "round_result %i" % i )      
-
-      try:
-        if( dies_now[i] and alive[i] ):
-          message( "DIE", "player %i, reason = %s" % (i, reason[i]) )
-          players[i].die()
-      except:
-        message( "EXCEPTION", "die %i" % i)      
-
-    # sprawdz, czy ktos zyje
-    for i in range(3):
-      if( dies_now[i] ): 
-        alive[i] = False      
-    players_alive =  int(alive[0]) + int(alive[1]) + int(alive[2])
-    if( players_alive <= 1 ):
-      break 
-
-    #ile nabojow
-#    for i in range(3):
-#      message("BULLETS", "%i --> %i" % (i, bullets[i]))
-
-    
-
-  # podaj wyniki
-  game_scores = [0.0, 0.0, 0.0]
-  if( players_alive > 0 ):
-    for i in range(3):
-      game_scores[i] = float( alive[i] ) / float(players_alive)
-  else:
-    get_points = int(dies_now[0]) + int(dies_now[1]) + int(dies_now[2])
-    for i in range(3):
-      game_scores[i] = float( dies_now[i] ) / float( get_points )
-
-  for i in range(3):
-    try:
-      players[i].game_over( game_scores[i] )
-    except:
-      message( "EXCEPTION", "game_over %i" % i )
-
-
-  for i in range(3):
-    scores[i] += game_scores[i]
-  
-
-  return scores
-
-
-
-
-
-
-
-if __name__ == "__main__":
-   
-  seed()
-  if len(argv) < 4:
-    print "Invocation:"
-    print "   game player1 player2 player3"
-    exit()
-
-  scores = games( argv[1:4] )
-  print scores
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#!/usr/bin/env python
+# coding=utf-8
+
+
+allowed_strategies = ['DODGE', 'LOAD', 'SHOOT0', 'SHOOT1', 'SHOOT2']
+
+GUN_SIZE = 3
+
+class CowboyGame(object):
+    def __init__(self):
+        self.players = []
+        self.finished = False
+
+        self.bullets = [0, 0, 0]
+        self.players_alive = 3
+        self.alive = [True, True, True]
+        self.hide_prev = [False, False, False]  # did player dodge in last round
+        self.hide_now = [False, False, False]  # is player dodging now
+        self.shoots = [False, False, False]  # is player shooting someone
+        self.dies_now = [False, False, False]  # is player dying now
+        self.reason = ['', '', '']  # reason of death
+        self.shoots_at = [-1, -1, -1]  # who is shooting who
+        self.rewards = [0, 0, 0]  # rewards for the last move
+
+    def is_finished(self):
+        return self.finished
+
+    def get_rewards(self):
+        return self.rewards
+
+    def get_state(self):
+        return self.alive, self.bullets, self.hide_now
+
+    def do_turn(self, player1_move, player2_move, player3_move):
+        if self.finished:
+            raise ValueError('The game has finished!')
+
+        for i in range(3):
+            self.hide_prev[i] = self.hide_now[i]
+            self.dies_now[i] = False
+            self.shoots[i] = False
+
+        strategy = [player1_move, player2_move, player3_move]
+        for i in range(3):
+            if strategy[i] not in allowed_strategies:
+                raise ValueError('{0} - strategy must be one of: {1}'
+                                 .format(strategy[i], allowed_strategies))
+            if not self.alive[i]:
+                strategy[i] = ''
+
+        # Parse strategies
+        for i in range(3):
+            self.dies_now[i] = False
+
+            if self.alive[i]:
+                if strategy[i] == 'LOAD':
+                    self.bullets[i] += 1
+
+                self.hide_now[i] = False
+                if strategy[i] == 'DODGE':
+                    self.hide_now[i] = True
+
+                self.shoots[i] = False
+                if strategy[i][0:5] == 'SHOOT':
+                    self.shoots[i] = True
+                    self.shoots_at[i] = int(strategy[i][5:])
+
+        # Calculate round effects
+        for i in range(3):
+            if self.bullets[i] > GUN_SIZE:
+                self.dies_now[i] = True
+                self.reason[i] = "loading bullet above the limit"
+
+            if self.hide_now[i] and self.hide_prev[i]:
+                self.dies_now[i] = True
+                self.reason[i] = "hiding two times in a row"
+
+            if self.shoots[i]:
+                if self.bullets[i] == 0:
+                    self.dies_now[i] = True
+                    self.reason[i] = "shooting without bullets"
+                    continue
+
+                self.bullets[i] -= 1
+
+                if self.hide_now[self.shoots_at[i]]:
+                    continue
+                if self.shoots[self.shoots_at[i]] and self.shoots_at[self.shoots_at[i]] == i:
+                    continue
+                self.dies_now[self.shoots_at[i]] = True
+                self.reason[self.shoots_at[i]] = ("shot by %i" % i)
+
+        # check for deaths
+        for i in range(3):
+            if self.dies_now[i]:
+                self.alive[i] = False
+        players_alive = int(self.alive[0]) + int(self.alive[1]) + int(self.alive[2])
+        if players_alive <= 1:
+            self.finished = True
+            
+        # calculate rewards
+        for i in range(3):
+            shoot_me = 'SHOOT{who}'.format(who=i)
+            # if the player dies, negative reward
+            if self.dies_now[i]:
+                self.rewards[i] = -2
+            # if the player is already dead, whatever
+            elif not self.alive:
+                self.rewards[i] = 0
+            else:
+                # if the player has loaded a bullet and is still alive, positive reward
+                if strategy[i] == 'LOAD':
+                    self.rewards[i] = 1
+                # if the player has dodged
+                elif strategy[i] == 'DODGE':
+                    # and dodged successfully, positive reward
+                    if strategy[(i + 1) % 3] == shoot_me or strategy[(i + 2) % 3] == shoot_me:
+                        self.rewards[i] = 1
+                    # and dodged unsuccessfully, no reward
+                    else:
+                        self.rewards[i] = 0
+                # if the player has shot
+                elif strategy[i][0:5] == 'SHOOT':
+                    if strategy[i] == shoot_me:
+                        # and shot himself, he gets -3 for being a retard
+                        self.rewards[i] = -3
+                    else:
+                        target = int(strategy[i][5:6])
+                        # nice reward for killing
+                        if self.dies_now[target]:
+                            self.rewards[i] = 2
+                        else:
+                            # minus reward for shooting a dead man
+                            if not self.alive[target]:
+                                self.rewards[i] = -1
+                            # no reward for shooting but not killing
+                            else:
+                                self.rewards[i] = 0
+                # no reward for the dead
+                else:
+                    self.rewards[i] = 0
 
