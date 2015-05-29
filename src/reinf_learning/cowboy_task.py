@@ -12,7 +12,6 @@ class CowboyTask(Task):
     def __init__(self, environment):
         """ All tasks are coupled to an environment. """
         self.env = environment
-        # we will store the last reward given, remember that "r" in the Q learning formula is the one from the last interaction, not the one given for the current interaction!
 
     def performAction(self, action):
         """ A filtered mapping towards performAction of the underlying environment. """               
@@ -24,7 +23,7 @@ class CowboyTask(Task):
 
     def getReward(self):
         """ Compute and return the current reward (i.e. corresponding to the last action performed) """
-        return self.env.getReward()
+        return self.env.get_reward()
 
     @property
     def indim(self):

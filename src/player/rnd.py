@@ -4,10 +4,10 @@ import random
 class Player:
     def name(self, name):
         self.name = name
-        self.strategies = ["LADUJ", "UNIK", "LADUJ", "LADUJ"]
+        self.strategies = ["LOAD", "DODGE", "LOAD", "LOAD"]
         for i in range(3):
             if (i != name):
-                self.strategies += ["STRZEL %d" % i]
+                self.strategies += ["SHOOT%d" % i]
         self.message("strategies = %s" % str(self.strategies))
 
     def message(self, s):

@@ -5,11 +5,23 @@
 allowed_strategies = ['DODGE', 'LOAD', 'SHOOT0', 'SHOOT1', 'SHOOT2']
 
 GUN_SIZE = 3
+MAX_ROUNDS = 50
+
+REWARD_KILL = 2
+REWARD_DIE = -2
+REWARD_SUICIDE = -3
+REWARD_LOAD = 1
+REWARD_DODGE_SUCCESSFUL = 1
+REWARD_DODGE_UNSUCCESSFUL = 0
+REWARD_SHOOT_A_CORPSE = -1
+REWARD_NEGATE_SHOTS = 1
+REWARD_SHOOT_DODGER = 0
 
 class CowboyGame(object):
     def __init__(self):
         self.players = []
         self.finished = False
+        self.round = 0
 
         self.bullets = [0, 0, 0]
         self.players_alive = 3
@@ -50,8 +62,6 @@ class CowboyGame(object):
 
         # Parse strategies
         for i in range(3):
-            self.dies_now[i] = False
-
             if self.alive[i]:
                 if strategy[i] == 'LOAD':
                     self.bullets[i] += 1
@@ -85,7 +95,14 @@ class CowboyGame(object):
 
                 if self.hide_now[self.shoots_at[i]]:
                     continue
-                if self.shoots[self.shoots_at[i]] and self.shoots_at[self.shoots_at[i]] == i:
+                # If the cowboy shoots at sb that shoots at him at the same time, both live.
+                # BUT if it shoots himself, he dies.
+                if self.shoots[self.shoots_at[i]] and \
+                                self.shoots_at[self.shoots_at[i]] == i and \
+                                self.shoots_at[i] != i:
+                    continue
+                # if the target is already dead, no effect
+                if not self.alive[self.shoots_at[i]]:
                     continue
                 self.dies_now[self.shoots_at[i]] = True
                 self.reason[self.shoots_at[i]] = ("shot by %i" % i)
@@ -94,49 +111,55 @@ class CowboyGame(object):
         for i in range(3):
             if self.dies_now[i]:
                 self.alive[i] = False
-        players_alive = int(self.alive[0]) + int(self.alive[1]) + int(self.alive[2])
-        if players_alive <= 1:
+        self.players_alive = int(self.alive[0]) + int(self.alive[1]) + int(self.alive[2])
+        if self.players_alive <= 1:
             self.finished = True
-            
+
+        # check if max rounds has been reached
+        self.round += 1
+        if self.round >= MAX_ROUNDS:
+            self.finished = True
+
         # calculate rewards
         for i in range(3):
             shoot_me = 'SHOOT{who}'.format(who=i)
             # if the player dies, negative reward
             if self.dies_now[i]:
-                self.rewards[i] = -2
+                if strategy[i] == shoot_me:
+                    # and shot himself, he gets -3 for being a retard
+                    self.rewards[i] = REWARD_SUICIDE
+                else:
+                    self.rewards[i] = REWARD_DIE
             # if the player is already dead, whatever
-            elif not self.alive:
+            elif not self.alive[i]:
                 self.rewards[i] = 0
             else:
                 # if the player has loaded a bullet and is still alive, positive reward
                 if strategy[i] == 'LOAD':
-                    self.rewards[i] = 1
+                    self.rewards[i] = REWARD_LOAD
                 # if the player has dodged
                 elif strategy[i] == 'DODGE':
                     # and dodged successfully, positive reward
                     if strategy[(i + 1) % 3] == shoot_me or strategy[(i + 2) % 3] == shoot_me:
-                        self.rewards[i] = 1
+                        self.rewards[i] = REWARD_DODGE_SUCCESSFUL
                     # and dodged unsuccessfully, no reward
                     else:
-                        self.rewards[i] = 0
+                        self.rewards[i] = REWARD_DODGE_UNSUCCESSFUL
                 # if the player has shot
                 elif strategy[i][0:5] == 'SHOOT':
-                    if strategy[i] == shoot_me:
-                        # and shot himself, he gets -3 for being a retard
-                        self.rewards[i] = -3
+                    target = int(strategy[i][5:6])
+                    # nice reward for killing
+                    if self.dies_now[target]:
+                        self.rewards[i] = REWARD_KILL
                     else:
-                        target = int(strategy[i][5:6])
-                        # nice reward for killing
-                        if self.dies_now[target]:
-                            self.rewards[i] = 2
+                        # minus reward for shooting a dead man
+                        if not self.alive[target]:
+                            self.rewards[i] = REWARD_SHOOT_A_CORPSE
                         else:
-                            # minus reward for shooting a dead man
-                            if not self.alive[target]:
-                                self.rewards[i] = -1
-                            # no reward for shooting but not killing
+                            # reward for shooting a cowboy that shot at him
+                            if self.shoots_at[target] == i:
+                                self.rewards[i] = REWARD_NEGATE_SHOTS
+                            # no reward for shooting at a dodging player
                             else:
-                                self.rewards[i] = 0
-                # no reward for the dead
-                else:
-                    self.rewards[i] = 0
+                                self.rewards[i] = REWARD_SHOOT_DODGER
 
