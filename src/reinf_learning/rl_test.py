@@ -11,14 +11,25 @@ from pybrain.rl.explorers import EpsilonGreedyExplorer
 import sys
 
 
-def run(learning_rounds, test_rounds, player1_file, player2_file, alpha, gamma, epsilon, logs, interactive_test):
+def run(
+        learning_rounds,
+        test_rounds,
+        player1_learn_file,
+        player2_learn_file,
+        player1_test_file,
+        player2_test_file,
+        alpha,
+        gamma,
+        epsilon,
+        logs,
+        interactive_test):
     """
     Run a learning process with given parameters, than tests agent's performance
     by playing given amount of test games and returns the percent of won games.
     """
 
     # define the environment
-    env = CowboyEnv(player1_file, player2_file)
+    env = CowboyEnv(player1_learn_file, player2_learn_file, player1_test_file, player2_test_file)
 
     # define the task
     task = CowboyTask(env)
@@ -45,15 +56,15 @@ def run(learning_rounds, test_rounds, player1_file, player2_file, alpha, gamma, 
             experiment.doInteractions(1)
             if learn:
                 agent.learn()
-                agent.reset()
+            agent.reset()
             rounds_played += 1
         env.reset()
         return rounds_played
 
     env.toggle_logs(False)
 
-    round_counter = 0
     # Learn for given number of rounds
+    round_counter = 0
     while round_counter < learning_rounds:
         round_counter += play_one_game(True)
         if logs:
@@ -61,21 +72,28 @@ def run(learning_rounds, test_rounds, player1_file, player2_file, alpha, gamma, 
                              (round_counter * 100.0 / learning_rounds))
             sys.stdout.flush()
 
-    round_counter = 0
-    score = 0
-    env.toggle_logs(True)
     # Test for given number of rounds
+    env.toggle_test(True)
+    round_counter = 0
+    game_counter = 0
+    score = 0
+    if interactive_test:
+        env.toggle_logs(True)
     while round_counter < test_rounds:
         round_counter += play_one_game(False)
-        score = env.agent_score()
+        game_counter += 1
+        score += env.agent_score()
         if interactive_test:
-            print(sys.stdout.write("Testing progress: %d%%" % (round_counter * 100.0 / learning_rounds)))
+            print("Testing progress: %d%%" % (round_counter * 100.0 / learning_rounds))
             raw_input('Score: {0} ->'.format(score))
         elif logs:
-            sys.stdout.write("Testing progress: %d%%   \r" %
-                             (round_counter * 100.0 / learning_rounds))
-            sys.stdout.flush()
+            if learning_rounds > 0:
+                sys.stdout.write("Testing progress: %d%%   \r" %
+                                 (round_counter * 100.0 / learning_rounds))
+                sys.stdout.flush()
 
-    sys.stdout.write("                                                  \r")
-    sys.stdout.flush()
-    return score * 100.0 / test_rounds
+    if logs:
+        sys.stdout.write("                                                  \r")
+        sys.stdout.flush()
+
+    return score * 100.0 / game_counter

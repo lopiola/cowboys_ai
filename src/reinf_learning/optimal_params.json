@@ -1,0 +1,65 @@
+{
+    "setup1": {
+        "player1_learn_file": "player/best_avg.py",
+        "player2_learn_file": "player/best_avg.py",
+        "player1_test_file": "player/best_avg.py",
+        "player2_test_file": "player/best_avg.py",
+        "alpha": 0.92,
+        "gamma": 0.86,
+        "epsilon": 0.09
+    },
+    "setup2": {
+        "player1_learn_file": "player/good_rnd.py",
+        "player2_learn_file": "player/good_rnd.py",
+        "player1_test_file": "player/good_rnd.py",
+        "player2_test_file": "player/good_rnd.py",
+        "alpha": 0.96,
+        "gamma": 0.66,
+        "epsilon": 0.06
+    },
+    "setup3": {
+        "player1_learn_file": "player/best_avg.py",
+        "player2_learn_file": "player/best_avg.py",
+        "player1_test_file": "player/good_rnd.py",
+        "player2_test_file": "player/good_rnd.py",
+        "alpha": 0.475,
+        "gamma": 0.85,
+        "epsilon": 0.3
+    },
+    "setup4": {
+        "player1_learn_file": "player/good_rnd.py",
+        "player2_learn_file": "player/good_rnd.py",
+        "player1_test_file": "player/best_avg.py",
+        "player2_test_file": "player/best_avg.py",
+        "alpha": 0.15,
+        "gamma": 0.275,
+        "epsilon": 0.5
+    },
+    "setup5": {
+        "player1_learn_file": "player/lopiola.py",
+        "player2_learn_file": "player/lopiola.py",
+        "player1_test_file": "player/lopiola.py",
+        "player2_test_file": "player/lopiola.py",
+        "alpha": 0.7,
+        "gamma": 0.85,
+        "epsilon": 0.025
+    },
+    "setup6": {
+        "player1_learn_file": "player/lopiola.py",
+        "player2_learn_file": "player/lopiola.py",
+        "player1_test_file": "player/best_avg.py",
+        "player2_test_file": "player/best_avg.py",
+        "alpha": 0.3,
+        "gamma": 0.5,
+        "epsilon": 0.65
+    },
+    "setup7": {
+        "player1_learn_file": "player/lopiola.py",
+        "player2_learn_file": "player/lopiola.py",
+        "player1_test_file": "player/rnd.py",
+        "player2_test_file": "player/rnd.py",
+        "alpha": 0.3,
+        "gamma": 0.6,
+        "epsilon": 0.06
+    }
+}
