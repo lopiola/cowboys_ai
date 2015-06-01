@@ -4,16 +4,16 @@
 import rl_test
 from multiprocessing import Pool
 
-player1_learn_file = 'player/best_avg.py'
-player2_learn_file = 'player/best_avg.py'
+player1_learn_file = 'player/lopiola.py'
+player2_learn_file = 'player/lopiola.py'
 player1_test_file = 'player/best_avg.py'
 player2_test_file = 'player/best_avg.py'
-alpha = 0.92
-gamma = 0.86
-epsilon = 0.09
+alpha = 0.3
+gamma = 0.5
+epsilon = 0.025
 
-# learning_rounds_list = [0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
-learning_rounds_list = [500000]
+learning_rounds_list = [0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
+# learning_rounds_list = [500000]
 test_rounds = 500
 single_test_repeats = 30
 
