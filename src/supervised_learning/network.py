@@ -32,25 +32,48 @@ def save_to_file(filename, network):
 def train_and_save(input_size,
                    output_size,
                    hidden_size,
-                   dataset_filename,
+                   training_epochs,
                    network_filename,
-                   training_epochs):
+                   dataset_filename):
 
     network = build(input_size, hidden_size, output_size)
-    ds = dataset.load_from_file("datasets/rnd_rnd_rnd.data")
+    ds = dataset.load_from_file(dataset_filename)
     train(network, ds, training_epochs)
     save_to_file(network_filename, network)
 
 def rnd_config():
     return {
-        "input_size": 9,
-        "output_size": 1,
-        "hidden_size": 50,
         "network_filename": "network/rnd_net.pickle",
-        "dataset_filename": "dataset/rnd_rnd_rnd.data",
-        "training_epochs": 300
+        "dataset_filename": "datasets/rnd.data",
+    }
+
+def avg_best_config():
+    return {
+        "network_filename": "network/avg_best_net.pickle",
+        "dataset_filename": "datasets/avg_best.data",
+    }
+
+def thinking_config():
+    return {
+        "network_filename": "network/thinking_net.pickle",
+        "dataset_filename": "datasets/thinking.data",
+    }
+
+def mixed_config():
+    return {
+        "network_filename": "network/mixed_net.pickle",
+        "dataset_filename": "datasets/mixed.data",
     }
 
 if __name__ == '__main__':
-    train_and_save(**rnd_config())
+    input_size = 9
+    output_size = 1
+    hidden_size = 15
+    training_epochs = 200
+    train_and_save(
+        input_size,
+        output_size,
+        hidden_size,
+        training_epochs,
+        **rnd_config())
 

@@ -8,10 +8,30 @@ def rnd_config():
         "player1_filename": 'src/player/rnd.py',
         "player2_filename": 'src/player/rnd.py',
         "player3_filename": 'src/player/rnd.py',
-        "filename": 'rnd_rnd_rnd.data',
+        "filename": 'rnd.data',
+        "game_count": 5000
+    }
+
+
+def best_avg_config():
+    return {
+        "player1_filename": 'src/player/best_avg.py',
+        "player2_filename": 'src/player/best_avg.py',
+        "player3_filename": 'src/player/best_avg.py',
+        "filename": 'best_avg.data',
+        "game_count": 5000
+    }
+
+
+def thinking_config():
+    return {
+        "player1_filename": 'src/player/lopiola.py',
+        "player2_filename": 'src/player/lopiola.py',
+        "player3_filename": 'src/player/lopiola.py',
+        "filename": 'thinking.data',
         "game_count": 5000
     }
 
 if __name__ == '__main__':
-    generate(**rnd_config())
+    generate(**thinking_config())
 

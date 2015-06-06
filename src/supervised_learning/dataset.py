@@ -28,7 +28,3 @@ def load_from_file(filename):
                 tuple(data[:input_size]),
                 tuple(data[-output_size:]))
     return dataset
-
-if __name__ == '__main__':
-    dataset = load_from_file("datasets/rnd_rnd_rnd.data")
-    inp = dataset['input']

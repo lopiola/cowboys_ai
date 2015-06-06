@@ -72,7 +72,7 @@ class BasicFilePersister(object):
 
 class ConsolePersister(object):
     def persist_round(self, strategies, state, rewards):
-        print strategies
+        # print strategies
         state_format = format_state(prepare_state(state, strategies[0]))
         line = "{0} {1}\n".format(
             state_format,
