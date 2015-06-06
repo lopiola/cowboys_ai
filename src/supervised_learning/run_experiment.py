@@ -31,13 +31,19 @@ def good_rnd_config():
         "game_count": 1000
     }
 
-def best_avg_config():
+def best_rnd_config():
     return {
-        "player2_filename": 'src/player/best_avg.py',
+        "player2_filename": 'src/player/good_rnd.py',
         "player3_filename": 'src/player/best_avg.py',
         "game_count": 1000
     }
 
+def best_thinking_config():
+    return {
+        "player2_filename": 'src/player/best_avg.py',
+        "player3_filename": 'src/player/lopiola.py',
+        "game_count": 1000
+    }
 
 def thinking_config():
     return {
@@ -47,9 +53,10 @@ def thinking_config():
     }
 
 def configs():
-    return [rnd_config(), good_rnd_config(), best_avg_config(), thinking_config()]
+    return [rnd_config(), good_rnd_config(), best_rnd_config(), best_thinking_config(), thinking_config()]
 
 if __name__ == '__main__':
-    network_filename = 'network/rnd_net.pickle'
+    network_filename = 'network/thinking_net.pickle'
+    # for conf in [best_thinking_config()]:
     for conf in configs():
         run(network_filename, **conf)

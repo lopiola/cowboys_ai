@@ -47,10 +47,10 @@ def rnd_config():
         "dataset_filename": "datasets/rnd.data",
     }
 
-def avg_best_config():
+def best_avg_config():
     return {
-        "network_filename": "network/avg_best_net.pickle",
-        "dataset_filename": "datasets/avg_best.data",
+        "network_filename": "network/best_avg_net.pickle",
+        "dataset_filename": "datasets/best_avg.data",
     }
 
 def thinking_config():
@@ -75,5 +75,5 @@ if __name__ == '__main__':
         output_size,
         hidden_size,
         training_epochs,
-        **rnd_config())
+        **mixed_config())
 
