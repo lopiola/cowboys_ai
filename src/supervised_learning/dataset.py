@@ -18,7 +18,7 @@ def generate(player1_filename, player2_filename, player3_filename, filename, gam
     persister.close()
 
 def load_from_file(filename):
-    input_size = 10
+    input_size = 9
     output_size = 1
     dataset = SupervisedDataSet(input_size, output_size)
     with open(filename, 'r') as datafile:

@@ -8,7 +8,8 @@ def rnd_config():
         "player1_filename": 'src/player/rnd.py',
         "player2_filename": 'src/player/rnd.py',
         "player3_filename": 'src/player/rnd.py',
-        "filename": 'rnd_rnd_rnd.data'
+        "filename": 'rnd_rnd_rnd.data',
+        "game_count": 5000
     }
 
 if __name__ == '__main__':
