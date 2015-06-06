@@ -56,7 +56,7 @@ def configs():
     return [rnd_config(), good_rnd_config(), best_rnd_config(), best_thinking_config(), thinking_config()]
 
 if __name__ == '__main__':
-    network_filename = 'network/thinking_net.pickle'
-    # for conf in [best_thinking_config()]:
-    for conf in configs():
+    network_filename = 'network/mixed_net.pickle'
+    for conf in [best_thinking_config()]:
+    # for conf in configs():
         run(network_filename, **conf)
